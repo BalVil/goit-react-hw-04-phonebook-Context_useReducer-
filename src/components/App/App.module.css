@@ -1,0 +1,14 @@
+.container {
+  width: 380px;
+
+  padding: 16px;
+  margin: 0 auto;
+}
+.section {
+  margin-bottom: 16px;
+}
+.title {
+  margin-bottom: 16px;
+
+  font-size: 28px;
+}

@@ -1,95 +1,74 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { nanoid } from 'nanoid';
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import 'modern-normalize';
 import css from './App.module.css';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ContactForm } from 'components/ContactForm/ContactForm';
 import { ContactList } from 'components/ContactList/ContactList';
 import { Filter } from 'components/Filter/Filter';
 
 const LS_KEY = 'contacts';
+const initialContact = [{ id: 'id-1', name: 'user', number: '000-00-00' }];
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useLocalStorage(LS_KEY, initialContact);
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    const savedState = localStorage.getItem(LS_KEY);
-    const parsedContacts = JSON.parse(savedState);
-
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-
-    if (prevState.contacts !== contacts) {
-      localStorage.setItem(LS_KEY, JSON.stringify(contacts));
-    }
-  }
-
-  addContact = ({ name, number }) => {
+  const handleAddContact = ({ name, number }) => {
     const contact = {
       id: nanoid(),
       name,
       number,
     };
 
-    const { contacts } = this.state;
-    if (
+    const sameName =
       contacts.findIndex(
         item => item.name.toLowerCase() === name.toLowerCase()
-      ) !== -1
-    ) {
-      alert(`${name} is already in contacts `);
+      ) !== -1;
+
+    if (sameName) {
+      toast.warn(`${name} is already in contacts `);
       return;
     }
 
-    this.setState(({ contacts }) => ({ contacts: [contact, ...contacts] }));
+    setContacts(prev => [...prev, contact]);
   };
 
-  changeFilter = e => {
-    this.setState({ filter: e.currentTarget.value });
-  };
+  const changeFilter = e => setFilter(e.target.value);
 
-  getFilteredContact = () => {
-    const { contacts, filter } = this.state;
+  const getFilteredContact = () => {
     const normalizedFilter = filter.toLowerCase();
 
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter)
+    return contacts.filter(({ name }) =>
+      name.toLowerCase().includes(normalizedFilter)
     );
   };
 
-  deleteContact = id => {
-    this.setState(({ contacts }) => ({
-      contacts: contacts.filter(contact => contact.id !== id),
-    }));
+  const deleteContact = currentId => {
+    setContacts(contacts.filter(({ id }) => id !== currentId));
   };
 
-  render() {
-    const { filter } = this.state;
-
-    const visibleContacts = this.getFilteredContact();
-
-    return (
-      <div className={css.container}>
-        <section className={css.section}>
-          <h1 className={css.title}>Phonebook</h1>
-          <ContactForm onSubmit={this.addContact} />
-        </section>
-        <section className={css.section}>
-          <h2 className={css.title}>Contacts</h2>
-          <Filter value={filter} onChange={this.changeFilter} />
+  return (
+    <div className={css.container}>
+      <section className={css.section}>
+        <h1 className={css.title}>Phonebook</h1>
+        <ContactForm onSubmit={handleAddContact} />
+      </section>
+      <section className={css.section}>
+        <h2 className={css.title}>Contacts</h2>
+        <Filter value={filter} onChange={changeFilter} />
+        {contacts.length > 0 ? (
           <ContactList
-            contacts={visibleContacts}
-            onDeleteContact={this.deleteContact}
+            contacts={getFilteredContact()}
+            onDeleteContact={deleteContact}
           />
-        </section>
-      </div>
-    );
-  }
-}
+        ) : (
+          <div>No contacts in the phonebook</div>
+        )}
+      </section>
+      <ToastContainer autoClose={3000} transition={Slide} />
+    </div>
+  );
+};

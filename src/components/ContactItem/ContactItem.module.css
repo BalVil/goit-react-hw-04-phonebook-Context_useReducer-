@@ -1,0 +1,14 @@
+.contact {
+  margin-bottom: 8px;
+  line-height: 1.4em;
+}
+.contact:last-child {
+  margin-bottom: 0;
+}
+.name {
+  margin-right: 10px;
+  font-weight: 600;
+}
+.number {
+  margin-right: 35px;
+}

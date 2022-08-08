@@ -1,29 +1,34 @@
-import PropTypes from 'prop-types';
+import { useContext } from 'react';
 import css from './ContactList.module.css';
-import { ContactItem } from 'components/ContactItem/ContactItem';
+import { ContactsContext } from 'context/ContactsContext';
+import { getFilteredContactsName } from 'hooks/useFilteredContacsName';
 
-export const ContactList = ({ contacts, onDeleteContact }) => {
+export const ContactList = () => {
+  const { state, deleteContact } = useContext(ContactsContext);
+
   return (
-    <ul className={css.contact__list}>
-      {contacts.map(({ id, name, number }) => {
-        return (
-          <ContactItem
-            key={id}
-            name={name}
-            number={number}
-            className={css.contact}
-            onDeleteContact={() => onDeleteContact(id)}
-          ></ContactItem>
-        );
-      })}
-    </ul>
+    <>
+      {state.items.length > 0 ? (
+        <ul>
+          {getFilteredContactsName(state).map(({ id, name, number }) => {
+            return (
+              <li key={id} className={css.contact}>
+                <span className={css.name}>{name}:</span>
+                <span className={css.number}>{number}</span>
+                <button
+                  className={css.button__del}
+                  type="button"
+                  onClick={() => deleteContact(id)}
+                >
+                  Delete
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div>No contacts in the phonebook</div>
+      )}
+    </>
   );
-};
-
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-    })
-  ),
 };

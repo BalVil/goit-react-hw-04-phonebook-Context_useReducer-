@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useState, useContext } from 'react';
 import css from './ContactForm.module.css';
+import { ContactsContext } from 'context/ContactsContext';
 
-export const ContactForm = ({ onSubmit }) => {
+export const ContactForm = () => {
+  const { addContact } = useContext(ContactsContext);
+
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
@@ -26,7 +28,7 @@ export const ContactForm = ({ onSubmit }) => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    onSubmit({ name, number });
+    addContact({ name, number });
     setName('');
     setNumber('');
   };
@@ -62,8 +64,4 @@ export const ContactForm = ({ onSubmit }) => {
       <button type="submit">Add contact</button>
     </form>
   );
-};
-
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
 };

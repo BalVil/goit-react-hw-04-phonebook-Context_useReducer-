@@ -1,3 +1,33 @@
-.contact__list {
-  margin-left: 20px;
+.contact {
+  /* margin-bottom: 8px;
+  line-height: 1.4em; */
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 8px 4px;
+
+  line-height: 1.4em;
+}
+.contact:not(:last-child) {
+  margin-bottom: 8px;
+}
+.name {
+  max-width: 42%;
+  flex-basis: 42%;
+  margin-right: 10px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+.number {
+  max-width: 35%;
+  overflow-wrap: break-word;
+}
+.button__del {
+  position: absolute;
+  right: 0;
+  top: 50%;
+
+  padding: 4px 8px;
+
+  transform: translate(0, -50%);
 }

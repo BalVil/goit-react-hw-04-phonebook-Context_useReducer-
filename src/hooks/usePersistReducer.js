@@ -1,6 +1,6 @@
 import { useReducer, useCallback } from 'react';
 import { useLocalStorage } from 'react-use';
-import { contactsReducer } from 'components/App/App';
+import contactsReducer from 'ContactsReducer';
 
 const LS_KEY = 'contacts';
 const INITIAL_STATE = {

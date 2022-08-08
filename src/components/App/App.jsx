@@ -1,20 +1,40 @@
-import { useState } from 'react';
 import { nanoid } from 'nanoid';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'modern-normalize';
 import css from './App.module.css';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { ContactForm } from 'components/ContactForm/ContactForm';
 import { ContactList } from 'components/ContactList/ContactList';
 import { Filter } from 'components/Filter/Filter';
+import { usePersistReducer } from 'hooks/usePersistReducer';
 
-const LS_KEY = 'contacts';
-const initialContact = [{ id: 'id-1', name: 'user', number: '000-00-00' }];
+export const contactsReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_CONTACT':
+      return {
+        ...state,
+        items: [...state.items, action.payload],
+      };
+
+    case 'DELETE_CONTACT':
+      return {
+        ...state,
+        items: state.items.filter(({ id }) => id !== action.payload),
+      };
+
+    case 'CHANGE_FILTER':
+      return {
+        ...state,
+        filter: action.payload,
+      };
+
+    default:
+      throw new Error(`No case for type ${action.type} found in Reducer.`);
+  }
+};
 
 export const App = () => {
-  const [contacts, setContacts] = useLocalStorage(LS_KEY, initialContact);
-  const [filter, setFilter] = useState('');
+  const [state, dispatch] = usePersistReducer();
 
   const handleAddContact = ({ name, number }) => {
     const contact = {
@@ -24,7 +44,7 @@ export const App = () => {
     };
 
     const sameName =
-      contacts.findIndex(
+      state.items.findIndex(
         item => item.name.toLowerCase() === name.toLowerCase()
       ) !== -1;
 
@@ -33,21 +53,25 @@ export const App = () => {
       return;
     }
 
-    setContacts(prev => [...prev, contact]);
-  };
-
-  const changeFilter = e => setFilter(e.target.value);
-
-  const getFilteredContact = () => {
-    const normalizedFilter = filter.toLowerCase();
-
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(normalizedFilter)
-    );
+    dispatch({ type: 'ADD_CONTACT', payload: contact });
   };
 
   const deleteContact = currentId => {
-    setContacts(contacts.filter(({ id }) => id !== currentId));
+    dispatch({
+      type: 'DELETE_CONTACT',
+      payload: currentId,
+    });
+  };
+
+  const changeFilter = e =>
+    dispatch({ type: 'CHANGE_FILTER', payload: e.target.value });
+
+  const getFilteredContact = () => {
+    const normalizedFilter = state.filter.toLowerCase();
+
+    return state.items.filter(({ name }) =>
+      name.toLowerCase().includes(normalizedFilter)
+    );
   };
 
   return (
@@ -58,8 +82,8 @@ export const App = () => {
       </section>
       <section className={css.section}>
         <h2 className={css.title}>Contacts</h2>
-        <Filter value={filter} onChange={changeFilter} />
-        {contacts.length > 0 ? (
+        <Filter value={state.filter} onChange={changeFilter} />
+        {state.items.length > 0 ? (
           <ContactList
             contacts={getFilteredContact()}
             onDeleteContact={deleteContact}
